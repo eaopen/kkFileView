@@ -29,3 +29,6 @@ nbdist/
 
 server/src/main/cache/
 server/src/main/file/
+
+
+**/*-docker-login.sh
