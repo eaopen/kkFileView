@@ -46,6 +46,7 @@ public class ConfigRefreshComponent {
                 String configFilePath = ConfigUtils.getCustomizedConfigPath();
                 String baseUrl;
                 String trustHost;
+                String notTrustHost;
                 String pdfPresentationModeDisable;
                 String pdfOpenFileDisable;
                 String pdfPrintDisable;
@@ -73,10 +74,14 @@ public class ConfigRefreshComponent {
                 boolean officeDocumentOpenPasswords;
                 String cadTimeout;
                 int cadThread;
-                String homePpageNumber;
+                String homePageNumber;
                 String homePagination;
                 String homePageSize;
                 String homeSearch;
+                int pdfTimeout;
+                int pdfTimeout80;
+                int pdfTimeout200;
+                int pdfThread;
                 while (true) {
                     FileReader fileReader = new FileReader(configFilePath);
                     BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -92,8 +97,9 @@ public class ConfigRefreshComponent {
                     ftpControlEncoding = properties.getProperty("ftp.control.encoding", ConfigConstants.DEFAULT_FTP_CONTROL_ENCODING);
                     textArray = text.split(",");
                     mediaArray = media.split(",");
-                    baseUrl = properties.getProperty("base.url", ConfigConstants.DEFAULT_BASE_URL);
-                    trustHost = properties.getProperty("trust.host", ConfigConstants.DEFAULT_TRUST_HOST);
+                    baseUrl = properties.getProperty("base.url", ConfigConstants.DEFAULT_VALUE);
+                    trustHost = properties.getProperty("trust.host", ConfigConstants.DEFAULT_VALUE);
+                    notTrustHost = properties.getProperty("not.trust.host", ConfigConstants.DEFAULT_VALUE);
                     pdfPresentationModeDisable = properties.getProperty("pdf.presentationMode.disable", ConfigConstants.DEFAULT_PDF_PRESENTATION_MODE_DISABLE);
                     pdfOpenFileDisable = properties.getProperty("pdf.openFile.disable", ConfigConstants.DEFAULT_PDF_OPEN_FILE_DISABLE);
                     pdfPrintDisable = properties.getProperty("pdf.print.disable", ConfigConstants.DEFAULT_PDF_PRINT_DISABLE);
@@ -119,11 +125,15 @@ public class ConfigRefreshComponent {
                     officeExportNotes = Boolean.parseBoolean(properties.getProperty("office.exportnotes", ConfigConstants.DEFAULT_OFFICE_EXPORTNOTES));
                     officeDocumentOpenPasswords =  Boolean.parseBoolean(properties.getProperty("office.documentopenpasswords", ConfigConstants.DEFAULT_OFFICE_EOCUMENTOPENPASSWORDS));
                     cadTimeout = properties.getProperty("cad.timeout", ConfigConstants.DEFAULT_CAD_TIMEOUT);
-                    homePpageNumber = properties.getProperty("home.pagenumber", ConfigConstants.DEFAULT_HOME_PAGENUMBER);
+                    homePageNumber = properties.getProperty("home.pagenumber", ConfigConstants.DEFAULT_HOME_PAGENUMBER);
                     homePagination = properties.getProperty("home.pagination", ConfigConstants.DEFAULT_HOME_PAGINATION);
                     homePageSize = properties.getProperty("home.pagesize", ConfigConstants.DEFAULT_HOME_PAGSIZE);
                     homeSearch = properties.getProperty("home.search", ConfigConstants.DEFAULT_HOME_SEARCH);
                     cadThread = Integer.parseInt(properties.getProperty("cad.thread", ConfigConstants.DEFAULT_CAD_THREAD));
+                    pdfTimeout = Integer.parseInt(properties.getProperty("pdf.timeout", ConfigConstants.DEFAULT_PDF_TIMEOUT));
+                    pdfTimeout80 = Integer.parseInt(properties.getProperty("pdf.timeout80", ConfigConstants.DEFAULT_PDF_TIMEOUT80));
+                    pdfTimeout200 = Integer.parseInt(properties.getProperty("pdf.timeout200", ConfigConstants.DEFAULT_PDF_TIMEOUT200));
+                    pdfThread = Integer.parseInt(properties.getProperty("pdf.thread", ConfigConstants.DEFAULT_PDF_THREAD));
                     prohibitArray = prohibit.split(",");
 
                     ConfigConstants.setCacheEnabledValueValue(cacheEnabled);
@@ -135,6 +145,7 @@ public class ConfigRefreshComponent {
                     ConfigConstants.setFtpControlEncodingValue(ftpControlEncoding);
                     ConfigConstants.setBaseUrlValue(baseUrl);
                     ConfigConstants.setTrustHostValue(trustHost);
+                    ConfigConstants.setNotTrustHostValue(notTrustHost);
                     ConfigConstants.setOfficePreviewSwitchDisabledValue(officePreviewSwitchDisabled);
                     ConfigConstants.setPdfPresentationModeDisableValue(pdfPresentationModeDisable);
                     ConfigConstants.setPdfOpenFileDisableValue(pdfOpenFileDisable);
@@ -162,10 +173,14 @@ public class ConfigRefreshComponent {
                     ConfigConstants.setDeleteCaptchaValue(deleteCaptcha);
                     ConfigConstants.setCadTimeoutValue(cadTimeout);
                     ConfigConstants.setCadThreadValue(cadThread);
-                    ConfigConstants.sethomePpageNumberValue(homePpageNumber);
-                    ConfigConstants.sethomePaginationValue(homePagination);
-                    ConfigConstants.sethomePageSizeValue(homePageSize);
-                    ConfigConstants.sethomeSearchValue(homeSearch);
+                    ConfigConstants.setHomePageNumberValue(homePageNumber);
+                    ConfigConstants.setHomePaginationValue(homePagination);
+                    ConfigConstants.setHomePageSizeValue(homePageSize);
+                    ConfigConstants.setHomeSearchValue(homeSearch);
+                    ConfigConstants.setPdfTimeoutValue(pdfTimeout);
+                    ConfigConstants.setPdfTimeout80Value(pdfTimeout80);
+                    ConfigConstants.setPdfTimeout200Value(pdfTimeout200);
+                    ConfigConstants.setPdfThreadValue(pdfThread);
                     setWatermarkConfig(properties);
                     bufferedReader.close();
                     fileReader.close();

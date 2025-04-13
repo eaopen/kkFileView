@@ -7,10 +7,10 @@ import cn.keking.service.FileHandlerService;
 import cn.keking.service.FilePreview;
 import cn.keking.utils.DownloadUtils;
 import cn.keking.utils.KkFileUtils;
+import cn.keking.utils.WebUtils;
 import cn.keking.web.filter.BaseUrlFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import static cn.keking.service.impl.OfficeFilePreviewImpl.getPreviewType;
@@ -58,7 +58,7 @@ public class CadFilePreviewImpl implements FilePreview {
                     e.printStackTrace();
                 }
                 if (imageUrls == null) {
-                    return otherFilePreview.notSupportedFile(model, fileAttribute, "office转图片异常，请联系管理员");
+                    return otherFilePreview.notSupportedFile(model, fileAttribute, "CAD转换异常，请联系管理员");
                 }
                 //是否保留CAD源文件
                 if (!fileAttribute.isCompressFile() && ConfigConstants.getDeleteSourceFile()) {
@@ -70,6 +70,7 @@ public class CadFilePreviewImpl implements FilePreview {
                 }
             }
         }
+        cacheName=  WebUtils.encodeFileName(cacheName);
         if ("tif".equalsIgnoreCase(cadPreviewType)) {
             model.addAttribute("currentUrl", cacheName);
             return TIFF_FILE_PREVIEW_PAGE;

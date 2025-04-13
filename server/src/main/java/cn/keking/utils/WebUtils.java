@@ -40,6 +40,59 @@ public class WebUtils {
         return io.mola.galimatias.URL.parse(urlStr).toJavaURL();
     }
 
+
+    /**
+     * 对文件名进行编码
+     *
+     */
+    public static String encodeFileName(String name) {
+        try {
+            name = URLEncoder.encode(name, "UTF-8").replaceAll("\\+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
+        return name;
+    }
+
+
+    /**
+     * 去除fullfilename参数
+     *
+     * @param urlStr
+     * @return
+     */
+    public static String clearFullfilenameParam(String urlStr) {
+        // 去除特定参数字段
+        Pattern pattern = Pattern.compile("(&fullfilename=[^&]*)");
+        Matcher matcher = pattern.matcher(urlStr);
+        return matcher.replaceAll("");
+    }
+
+    /**
+     * 对URL进行编码
+     */
+    public static String  urlEncoderencode(String urlStr) {
+
+        String fullFileName = getUrlParameterReg(urlStr, "fullfilename");  //获取流文件名
+        if (org.springframework.util.StringUtils.hasText(fullFileName)) {
+            // 移除fullfilename参数
+            urlStr = clearFullfilenameParam(urlStr);
+        } else {
+            fullFileName = getFileNameFromURL(urlStr); //获取文件名
+        }
+        if (KkFileUtils.isIllegalFileName(fullFileName)) { //判断文件名是否带有穿越漏洞
+            return null;
+        }
+        if (!UrlEncoderUtils.hasUrlEncoded(fullFileName)) {  //判断文件名是否转义
+            try {
+                urlStr = URLEncoder.encode(urlStr, "UTF-8").replaceAll("\\+", "%20").replaceAll("%3A", ":").replaceAll("%2F", "/").replaceAll("%3F", "?").replaceAll("%26", "&").replaceAll("%3D", "=");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        return urlStr;
+    }
+
     /**
      * 获取url中的参数
      *
@@ -239,14 +292,14 @@ public class WebUtils {
         try {
             return new String(Base64Utils.decodeFromString(source.replaceAll(" ", "+").replaceAll("\n", "")), charsets);
         } catch (Exception e) {
-           if (e.getMessage().toLowerCase().contains(BASE64_MSG)) {
-         LOGGER.error("url解码异常，接入方法错误未使用BASE64");
-        }else {
-        LOGGER.error("url解码异常，其他错误", e);
-          }
+            if (e.getMessage().toLowerCase().contains(BASE64_MSG)) {
+                LOGGER.error("url解码异常，接入方法错误未使用BASE64");
+            }else {
+                LOGGER.error("url解码异常，其他错误", e);
+            }
             return null;
         }
-        }
+    }
 
     /**
      * 获取 url 的 host

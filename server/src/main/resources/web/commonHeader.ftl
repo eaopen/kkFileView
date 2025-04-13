@@ -8,7 +8,19 @@
      */
     function initWaterMark() {
         let watermarkTxt = '${watermarkTxt}';
-        if (watermarkTxt !== '') {
+        if (watermarkTxt === '') {
+            return;
+        }
+        let lastWidth = 0;
+        let lastHeight = 0;
+        const checkResize = () => {
+            const currentWidth = document.documentElement.scrollWidth;
+            const currentHeight = document.documentElement.scrollHeight;
+            // 检测尺寸是否变化
+            if (currentWidth === lastWidth && currentHeight === lastHeight) {
+                return;
+            }
+            // 如果变化了, 重新初始化水印
             watermark.init({
                 watermark_txt: '${watermarkTxt}',
                 watermark_x: 0,
@@ -25,7 +37,11 @@
                 watermark_height: ${watermarkHeight},
                 watermark_angle: ${watermarkAngle},
             });
-        }
+            // 更新存储的宽口大小
+            lastWidth = currentWidth;
+            lastHeight = currentHeight;
+        };
+        setInterval(checkResize, 1000);
     }
 </script>
 

@@ -16,6 +16,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Component(value = ConfigConstants.BEAN_NAME)
 public class ConfigConstants {
     public static final String BEAN_NAME = "configConstants";
+
     static {
         //pdfbox兼容低版本jdk
         System.setProperty("sun.java2d.cmm", "sun.java2d.cmm.kcms.KcmsServiceProvider");
@@ -35,6 +36,7 @@ public class ConfigConstants {
     private static String fileDir = ConfigUtils.getHomePath() + File.separator + "file" + File.separator;
     private static String localPreviewDir;
     private static CopyOnWriteArraySet<String> trustHostSet;
+    private static CopyOnWriteArraySet<String> notTrustHostSet;
     private static String pdfPresentationModeDisable;
     private static String pdfDisableEditing;
     private static String pdfOpenFileDisable;
@@ -61,10 +63,14 @@ public class ConfigConstants {
     private static Boolean officeDocumentOpenPasswords;
     private static String cadTimeout;
     private static int cadThread;
-    private static String homePpageNumber;
+    private static String homePageNumber;
     private static String homePagination;
     private static String homePageSize;
     private static String homeSearch;
+    private static int pdfTimeout;
+    private static int pdfTimeout80;
+    private static int pdfTimeout200;
+    private static int pdfThread;
 
     public static final String DEFAULT_CACHE_ENABLED = "true";
     public static final String DEFAULT_TXT_TYPE = "txt,html,htm,asp,jsp,xml,json,properties,md,gitignore,log,java,py,c,cpp,sql,sh,bat,m,bas,prg,cmd,xbrl";
@@ -74,10 +80,7 @@ public class ConfigConstants {
     public static final String DEFAULT_FTP_USERNAME = null;
     public static final String DEFAULT_FTP_PASSWORD = null;
     public static final String DEFAULT_FTP_CONTROL_ENCODING = "UTF-8";
-    public static final String DEFAULT_BASE_URL = "default";
-    public static final String DEFAULT_FILE_DIR_VALUE = "default";
-    public static final String DEFAULT_LOCAL_PREVIEW_DIR_VALUE = "default";
-    public static final String DEFAULT_TRUST_HOST = "default";
+    public static final String DEFAULT_VALUE = "default";
     public static final String DEFAULT_PDF_PRESENTATION_MODE_DISABLE = "true";
     public static final String DEFAULT_PDF_OPEN_FILE_DISABLE = "true";
     public static final String DEFAULT_PDF_PRINT_DISABLE = "true";
@@ -108,6 +111,11 @@ public class ConfigConstants {
     public static final String DEFAULT_HOME_PAGINATION = "true";
     public static final String DEFAULT_HOME_PAGSIZE = "15";
     public static final String DEFAULT_HOME_SEARCH = "true";
+    public static final String DEFAULT_PDF_TIMEOUT = "90";
+    public static final String DEFAULT_PDF_TIMEOUT80 = "180";
+    public static final String DEFAULT_PDF_TIMEOUT200 = "300";
+    public static final String DEFAULT_PDF_THREAD = "5";
+
     public static Boolean isCacheEnabled() {
         return cacheEnabled;
     }
@@ -172,6 +180,7 @@ public class ConfigConstants {
     public void setMediaConvertDisable(String mediaConvertDisable) {
         setMediaConvertDisableValue(mediaConvertDisable);
     }
+
     public static void setMediaConvertDisableValue(String mediaConvertDisable) {
         ConfigConstants.mediaConvertDisable = mediaConvertDisable;
     }
@@ -251,7 +260,7 @@ public class ConfigConstants {
     }
 
     public static void setFileDirValue(String fileDir) {
-        if (!DEFAULT_FILE_DIR_VALUE.equalsIgnoreCase(fileDir)) {
+        if (!DEFAULT_VALUE.equalsIgnoreCase(fileDir)) {
             if (!fileDir.endsWith(File.separator)) {
                 fileDir = fileDir + File.separator;
             }
@@ -269,7 +278,7 @@ public class ConfigConstants {
     }
 
     public static void setLocalPreviewDirValue(String localPreviewDir) {
-        if (!DEFAULT_LOCAL_PREVIEW_DIR_VALUE.equals(localPreviewDir)) {
+        if (!DEFAULT_VALUE.equals(localPreviewDir)) {
             if (!localPreviewDir.endsWith(File.separator)) {
                 localPreviewDir = localPreviewDir + File.separator;
             }
@@ -279,19 +288,29 @@ public class ConfigConstants {
 
     @Value("${trust.host:default}")
     public void setTrustHost(String trustHost) {
-        setTrustHostValue(trustHost);
+        setTrustHostSet(getHostValue(trustHost));
     }
 
-    public static void setTrustHostValue(String trustHost) {
-        CopyOnWriteArraySet<String> trustHostSet;
-        if (DEFAULT_TRUST_HOST.equalsIgnoreCase(trustHost)) {
-            trustHostSet = new CopyOnWriteArraySet<>();
+    public static void setTrustHostValue(String trustHost){
+        setTrustHostSet(getHostValue(trustHost));
+    }
+
+    @Value("${not.trust.host:default}")
+    public void setNotTrustHost(String notTrustHost) {
+        setNotTrustHostSet(getHostValue(notTrustHost));
+    }
+
+    public static void setNotTrustHostValue(String notTrustHost){
+        setNotTrustHostSet(getHostValue(notTrustHost));
+    }
+
+    private static CopyOnWriteArraySet<String> getHostValue(String trustHost) {
+        if (DEFAULT_VALUE.equalsIgnoreCase(trustHost)) {
+            return new CopyOnWriteArraySet<>();
         } else {
             String[] trustHostArray = trustHost.toLowerCase().split(",");
-            trustHostSet = new CopyOnWriteArraySet<>(Arrays.asList(trustHostArray));
-            setTrustHostSet(trustHostSet);
+            return new CopyOnWriteArraySet<>(Arrays.asList(trustHostArray));
         }
-        setTrustHostSet(trustHostSet);
     }
 
     public static Set<String> getTrustHostSet() {
@@ -301,6 +320,15 @@ public class ConfigConstants {
     private static void setTrustHostSet(CopyOnWriteArraySet<String> trustHostSet) {
         ConfigConstants.trustHostSet = trustHostSet;
     }
+
+    public static Set<String> getNotTrustHostSet() {
+        return notTrustHostSet;
+    }
+
+    public static void setNotTrustHostSet(CopyOnWriteArraySet<String> notTrustHostSet) {
+        ConfigConstants.notTrustHostSet = notTrustHostSet;
+    }
+
 
     public static String getPdfPresentationModeDisable() {
         return pdfPresentationModeDisable;
@@ -323,6 +351,7 @@ public class ConfigConstants {
     public void setPdfOpenFileDisable(String pdfOpenFileDisable) {
         setPdfOpenFileDisableValue(pdfOpenFileDisable);
     }
+
     public static void setPdfOpenFileDisableValue(String pdfOpenFileDisable) {
         ConfigConstants.pdfOpenFileDisable = pdfOpenFileDisable;
     }
@@ -330,10 +359,12 @@ public class ConfigConstants {
     public static String getPdfPrintDisable() {
         return pdfPrintDisable;
     }
+
     @Value("${pdf.print.disable:true}")
     public void setPdfPrintDisable(String pdfPrintDisable) {
         setPdfPrintDisableValue(pdfPrintDisable);
     }
+
     public static void setPdfPrintDisableValue(String pdfPrintDisable) {
         ConfigConstants.pdfPrintDisable = pdfPrintDisable;
     }
@@ -346,6 +377,7 @@ public class ConfigConstants {
     public void setPdfDownloadDisable(String pdfDownloadDisable) {
         setPdfDownloadDisableValue(pdfDownloadDisable);
     }
+
     public static void setPdfDownloadDisableValue(String pdfDownloadDisable) {
         ConfigConstants.pdfDownloadDisable = pdfDownloadDisable;
     }
@@ -353,10 +385,12 @@ public class ConfigConstants {
     public static String getPdfBookmarkDisable() {
         return pdfBookmarkDisable;
     }
+
     @Value("${pdf.bookmark.disable:true}")
     public void setPdfBookmarkDisable(String pdfBookmarkDisable) {
         setPdfBookmarkDisableValue(pdfBookmarkDisable);
     }
+
     public static void setPdfBookmarkDisableValue(String pdfBookmarkDisable) {
         ConfigConstants.pdfBookmarkDisable = pdfBookmarkDisable;
     }
@@ -365,10 +399,12 @@ public class ConfigConstants {
     public static String getPdfDisableEditing() {
         return pdfDisableEditing;
     }
+
     @Value("${pdf.disable.editing:true}")
     public void setpdfDisableEditing(String pdfDisableEditing) {
         setPdfDisableEditingValue(pdfDisableEditing);
     }
+
     public static void setPdfDisableEditingValue(String pdfDisableEditing) {
         ConfigConstants.pdfDisableEditing = pdfDisableEditing;
     }
@@ -376,10 +412,12 @@ public class ConfigConstants {
     public static String getOfficePreviewSwitchDisabled() {
         return officePreviewSwitchDisabled;
     }
+
     @Value("${office.preview.switch.disabled:true}")
     public void setOfficePreviewSwitchDisabled(String officePreviewSwitchDisabled) {
         ConfigConstants.officePreviewSwitchDisabled = officePreviewSwitchDisabled;
     }
+
     public static void setOfficePreviewSwitchDisabledValue(String officePreviewSwitchDisabled) {
         ConfigConstants.officePreviewSwitchDisabled = officePreviewSwitchDisabled;
     }
@@ -414,6 +452,7 @@ public class ConfigConstants {
     public static String[] getProhibit() {
         return prohibit;
     }
+
     @Value("${prohibit:exe,dll}")
     public void setProhibit(String prohibit) {
         String[] prohibitArr = prohibit.split(",");
@@ -423,13 +462,16 @@ public class ConfigConstants {
     public static void setProhibitValue(String[] prohibit) {
         ConfigConstants.prohibit = prohibit;
     }
+
     public static String maxSize() {
         return size;
     }
+
     @Value("${spring.servlet.multipart.max-file-size:500MB}")
     public void setSize(String size) {
         setSizeValue(size);
     }
+
     public static void setSizeValue(String size) {
         ConfigConstants.size = size;
     }
@@ -437,10 +479,12 @@ public class ConfigConstants {
     public static String getPassword() {
         return password;
     }
+
     @Value("${delete.password:123456}")
     public void setPassword(String password) {
         setPasswordValue(password);
     }
+
     public static void setPasswordValue(String password) {
         ConfigConstants.password = password;
     }
@@ -449,10 +493,12 @@ public class ConfigConstants {
     public static int getPdf2JpgDpi() {
         return pdf2JpgDpi;
     }
+
     @Value("${pdf2jpg.dpi:105}")
     public void pdf2JpgDpi(int pdf2JpgDpi) {
         setPdf2JpgDpiValue(pdf2JpgDpi);
     }
+
     public static void setPdf2JpgDpiValue(int pdf2JpgDpi) {
         ConfigConstants.pdf2JpgDpi = pdf2JpgDpi;
     }
@@ -460,10 +506,12 @@ public class ConfigConstants {
     public static String getOfficeTypeWeb() {
         return officeTypeWeb;
     }
+
     @Value("${office.type.web:web}")
     public void setOfficeTypeWeb(String officeTypeWeb) {
         setOfficeTypeWebValue(officeTypeWeb);
     }
+
     public static void setOfficeTypeWebValue(String officeTypeWeb) {
         ConfigConstants.officeTypeWeb = officeTypeWeb;
     }
@@ -541,16 +589,77 @@ public class ConfigConstants {
     }
 
     /**
+     * 以下为pdf转换模块设置
+     */
+    public static int getPdfTimeout() {
+        return pdfTimeout;
+    }
+
+    @Value("${pdf.timeout:90}")
+    public void setPdfTimeout(int pdfTimeout) {
+        setPdfTimeoutValue(pdfTimeout);
+    }
+
+    public static void setPdfTimeoutValue(int pdfTimeout) {
+        ConfigConstants.pdfTimeout = pdfTimeout;
+    }
+
+
+    public static int getPdfTimeout80() {
+        return pdfTimeout80;
+    }
+
+    @Value("${pdf.timeout80:180}")
+    public void setPdfTimeout80(int pdfTimeout80) {
+        setPdfTimeout80Value(pdfTimeout80);
+    }
+
+    public static void setPdfTimeout80Value(int pdfTimeout80) {
+        ConfigConstants.pdfTimeout80 = pdfTimeout80;
+    }
+
+
+
+    public static int getPdfTimeout200() {
+        return pdfTimeout200;
+    }
+
+    @Value("${pdf.timeout200:300}")
+    public void setPdfTimeout200(int pdfTimeout200) {
+        setPdfTimeout200Value(pdfTimeout200);
+    }
+
+    public static void setPdfTimeout200Value(int pdfTimeout200) {
+        ConfigConstants.pdfTimeout200 = pdfTimeout200;
+    }
+
+
+    public static int getPdfThread() {
+        return pdfThread;
+    }
+
+    @Value("${pdf.thread:5}")
+    public void setPdfThread(int pdfThread) {
+        setPdfThreadValue(pdfThread);
+    }
+
+    public static void setPdfThreadValue(int pdfThread) {
+        ConfigConstants.pdfThread = pdfThread;
+    }
+
+    /**
      * 以下为OFFICE转换模块设置
      */
 
     public static String getOfficePageRange() {
         return officePageRange;
     }
+
     @Value("${office.pagerange:false}")
     public void setOfficePageRange(String officePageRange) {
         setOfficePageRangeValue(officePageRange);
     }
+
     public static void setOfficePageRangeValue(String officePageRange) {
         ConfigConstants.officePageRange = officePageRange;
     }
@@ -558,10 +667,12 @@ public class ConfigConstants {
     public static String getOfficeWatermark() {
         return officeWatermark;
     }
+
     @Value("${office.watermark:false}")
     public void setOfficeWatermark(String officeWatermark) {
         setOfficeWatermarkValue(officeWatermark);
     }
+
     public static void setOfficeWatermarkValue(String officeWatermark) {
         ConfigConstants.officeWatermark = officeWatermark;
     }
@@ -569,10 +680,12 @@ public class ConfigConstants {
     public static String getOfficeQuality() {
         return officeQuality;
     }
+
     @Value("${office.quality:80}")
     public void setOfficeQuality(String officeQuality) {
         setOfficeQualityValue(officeQuality);
     }
+
     public static void setOfficeQualityValue(String officeQuality) {
         ConfigConstants.officeQuality = officeQuality;
     }
@@ -580,10 +693,12 @@ public class ConfigConstants {
     public static String getOfficeMaxImageResolution() {
         return officeMaxImageResolution;
     }
+
     @Value("${office.maximageresolution:150}")
     public void setOfficeMaxImageResolution(String officeMaxImageResolution) {
         setOfficeMaxImageResolutionValue(officeMaxImageResolution);
     }
+
     public static void setOfficeMaxImageResolutionValue(String officeMaxImageResolution) {
         ConfigConstants.officeMaxImageResolution = officeMaxImageResolution;
     }
@@ -591,10 +706,12 @@ public class ConfigConstants {
     public static Boolean getOfficeExportBookmarks() {
         return officeExportBookmarks;
     }
+
     @Value("${office.exportbookmarks:true}")
     public void setOfficeExportBookmarks(Boolean officeExportBookmarks) {
         setOfficeExportBookmarksValue(officeExportBookmarks);
     }
+
     public static void setOfficeExportBookmarksValue(Boolean officeExportBookmarks) {
         ConfigConstants.officeExportBookmarks = officeExportBookmarks;
     }
@@ -602,10 +719,12 @@ public class ConfigConstants {
     public static Boolean getOfficeExportNotes() {
         return officeExportNotes;
     }
+
     @Value("${office.exportnotes:true}")
     public void setExportNotes(Boolean officeExportNotes) {
         setOfficeExportNotesValue(officeExportNotes);
     }
+
     public static void setOfficeExportNotesValue(Boolean officeExportNotes) {
         ConfigConstants.officeExportNotes = officeExportNotes;
     }
@@ -613,10 +732,12 @@ public class ConfigConstants {
     public static Boolean getOfficeDocumentOpenPasswords() {
         return officeDocumentOpenPasswords;
     }
+
     @Value("${office.documentopenpasswords:true}")
     public void setDocumentOpenPasswords(Boolean officeDocumentOpenPasswords) {
         setOfficeDocumentOpenPasswordsValue(officeDocumentOpenPasswords);
     }
+
     public static void setOfficeDocumentOpenPasswordsValue(Boolean officeDocumentOpenPasswords) {
         ConfigConstants.officeDocumentOpenPasswords = officeDocumentOpenPasswords;
     }
@@ -628,56 +749,66 @@ public class ConfigConstants {
     public static String getBeian() {
         return beian;
     }
+
     @Value("${beian:default}")
     public void setBeian(String beian) {
         setBeianValue(beian);
     }
+
     public static void setBeianValue(String beian) {
         ConfigConstants.beian = beian;
     }
 
 
-    public static String gethomePpageNumber() {
-        return homePpageNumber;
-    }
-    @Value("${home.pagenumber:1}")
-    public void sethomePpageNumber(String homePpageNumber) {
-        sethomePpageNumberValue(homePpageNumber);
-    }
-    public static void sethomePpageNumberValue(String homePpageNumber) {
-        ConfigConstants.homePpageNumber = homePpageNumber;
+    public static String getHomePageNumber() {
+        return homePageNumber;
     }
 
-    public static String gethomePagination() {
+    @Value("${home.pagenumber:1}")
+    public void setHomePageNumber(String homePageNumber) {
+        setHomePageNumberValue(homePageNumber);
+    }
+
+    public static void setHomePageNumberValue(String homePageNumber) {
+        ConfigConstants.homePageNumber = homePageNumber;
+    }
+
+    public static String getHomePagination() {
         return homePagination;
     }
+
     @Value("${home.pagination:true}")
-    public void sethomePagination(String homePagination) {
-        sethomePaginationValue(homePagination);
+    public void setHomePagination(String homePagination) {
+        setHomePaginationValue(homePagination);
     }
-    public static void sethomePaginationValue(String homePagination) {
+
+    public static void setHomePaginationValue(String homePagination) {
         ConfigConstants.homePagination = homePagination;
     }
 
-    public static String gethomePageSize() {
+    public static String getHomePageSize() {
         return homePageSize;
     }
+
     @Value("${home.pagesize:15}")
-    public void sethomePagesize(String homePageSize) {
-        sethomePageSizeValue(homePageSize);
+    public void setHomePageSize(String homePageSize) {
+        setHomePageSizeValue(homePageSize);
     }
-    public static void sethomePageSizeValue(String homePageSize) {
+
+    public static void setHomePageSizeValue(String homePageSize) {
         ConfigConstants.homePageSize = homePageSize;
     }
 
-    public static String gethomeSearch() {
+    public static String getHomeSearch() {
         return homeSearch;
     }
+
     @Value("${home.search:1}")
-    public void sethomeSearch(String homeSearch) {
-        sethomeSearchValue(homeSearch);
+    public void setHomeSearch(String homeSearch) {
+        setHomeSearchValue(homeSearch);
     }
-    public static void sethomeSearchValue(String homeSearch) {
+
+    public static void setHomeSearchValue(String homeSearch) {
         ConfigConstants.homeSearch = homeSearch;
     }
 
