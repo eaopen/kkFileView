@@ -9,9 +9,8 @@
     <version>4.4.0</version>
 
     <properties>
-        <java.version>1.8</java.version>
         <jodconverter.version>4.4.6</jodconverter.version>
-        <spring.boot.version>2.4.2</spring.boot.version>
+        <spring.boot.version>3.4.3</spring.boot.version>
         <poi.version>5.2.2</poi.version>
         <xdocreport.version>1.0.6</xdocreport.version>
         <xstream.version>1.4.20</xstream.version>
@@ -32,10 +31,12 @@
         <ffmpeg.version>4.2.1-1.5.2</ffmpeg.version>
         <itextpdf.version>5.5.13.3</itextpdf.version>
         <httpclient.version>3.1</httpclient.version>
+        <httpclient5.version>5.2.3</httpclient5.version>
         <aspose-cad.version>23.9</aspose-cad.version>
         <bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
         <juniversalchardet.version>1.0.3</juniversalchardet.version>
         <httpcomponents.version>4.5.14</httpcomponents.version>
+        <nimbus-jose-jwt.version>9.41.2</nimbus-jose-jwt.version>
 
         <commons-cli.version>1.5.0</commons-cli.version>
         <commons-net.version>3.9.0</commons-net.version>
@@ -44,6 +45,8 @@
 
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -88,5 +91,63 @@
         <system>github</system>
         <url>https://github.com/kekingcn/kkFileView/issues</url>
     </issueManagement>
+
+    <repositories>
+        <repository>
+            <!--aspose-cad 包的仓库-->
+            <id>aspose-repos</id>
+            <name>aspose Repository</name>
+            <url>https://releases.aspose.com/java/repo/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <!--jai_core jai_codec 包的仓库-->
+            <id>geotoolkit-repos</id>
+            <name>geotoolkit Repository</name>
+            <url>https://nexus.geomatys.com/repository/geotoolkit/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <profiles>
+        <profile>
+            <id>boot3</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <properties>
+                <!--这里修改JDK版本号, 1.8, 11, 17-->
+                <java.version>17</java.version>
+                <!-- spring依赖 -->
+                <spring-boot.version>3.4.3</spring-boot.version>
+            </properties>
+            <dependencyManagement>
+            </dependencyManagement>
+        </profile>
+        <profile>
+            <id>boot2</id>
+            <activation>
+                <jdk>(,17)</jdk>
+            </activation>
+            <properties>
+                <!--这里修改JDK版本号, 1.8, 11, 17-->
+                <java.version>1.8</java.version>
+                <!-- spring依赖 -->
+                <spring-boot.version>2.7.18</spring-boot.version>
+            </properties>
+            <dependencyManagement>
+            </dependencyManagement>
+        </profile>
+    </profiles>
 
 </project>

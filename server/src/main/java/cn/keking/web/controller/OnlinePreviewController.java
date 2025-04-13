@@ -7,13 +7,14 @@ import cn.keking.service.FilePreviewFactory;
 import cn.keking.service.cache.CacheService;
 import cn.keking.service.impl.OtherFilePreviewImpl;
 import cn.keking.utils.KkFileUtils;
+import cn.keking.utils.RedisUtils;
 import cn.keking.utils.WebUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.opensagres.xdocreport.core.io.IOUtils;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultRedirectStrategy;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.DefaultRedirectStrategy;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
@@ -28,8 +29,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -55,18 +56,23 @@ public class OnlinePreviewController {
     private static final RestTemplate restTemplate = new RestTemplate();
     private static  final HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
     private static final ObjectMapper mapper = new ObjectMapper();
+    private final RedisUtils redisUtils;
 
-    public OnlinePreviewController(FilePreviewFactory filePreviewFactory, FileHandlerService fileHandlerService, CacheService cacheService, OtherFilePreviewImpl otherFilePreview) {
+    public OnlinePreviewController(FilePreviewFactory filePreviewFactory, FileHandlerService fileHandlerService, CacheService cacheService, OtherFilePreviewImpl otherFilePreview, RedisUtils redisUtils) {
         this.previewFactory = filePreviewFactory;
         this.fileHandlerService = fileHandlerService;
         this.cacheService = cacheService;
         this.otherFilePreview = otherFilePreview;
+        this.redisUtils = redisUtils;
     }
 
     @GetMapping( "/onlinePreview")
     public String onlinePreview(String url, Model model, HttpServletRequest req) {
 
         String fileUrl;
+
+        // todo 验证token
+
         try {
             fileUrl = WebUtils.decodeUrl(url);
         } catch (Exception ex) {
