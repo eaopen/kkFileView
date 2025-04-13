@@ -9,6 +9,7 @@ import cn.keking.utils.RarUtils;
 import cn.keking.utils.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +44,7 @@ import static cn.keking.utils.CaptchaUtil.CAPTCHA_GENERATE_TIME;
  * 2017/12/1
  */
 @RestController
+@ConditionalOnProperty(name = "file.upload.disable", havingValue = "false")
 public class FileController {
 
     private final Logger logger = LoggerFactory.getLogger(FileController.class);
