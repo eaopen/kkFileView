@@ -14,7 +14,7 @@ import org.springframework.util.ClassUtils;
  * Created by kl on 2017/09/26.
  * redisson 客户端配置
  */
-@ConditionalOnExpression("'${cache.type:default}'.equals('redis')")
+//@ConditionalOnExpression("'${cache.type:default}'.equals('redis')")
 @ConfigurationProperties(prefix = "spring.redisson")
 @Configuration
 public class RedissonConfig {

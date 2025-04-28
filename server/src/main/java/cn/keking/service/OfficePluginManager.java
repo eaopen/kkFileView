@@ -1,6 +1,8 @@
 package cn.keking.service;
 
 import cn.keking.utils.LocalOfficeUtils;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.StringUtils;
 import org.jodconverter.core.office.InstalledOfficeManagerHolder;
 import org.jodconverter.core.office.OfficeException;
@@ -15,8 +17,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -49,10 +49,22 @@ public class OfficePluginManager {
     @Value("${office.plugin.task.maxtasksperprocess:5}")
     private int maxTasksPerProcess;
 
+    @Value("${office.plugin.server.start:true}")
+    private boolean startOfficeManagerOnStart;
+
     /**
      * 启动Office组件进程
      */
     @PostConstruct
+    public void postAction() throws OfficeException {
+        if (startOfficeManagerOnStart) {
+            startOfficeManager();
+        }
+    }
+
+    /**
+     * 启动Office组件进程
+     */
     public void startOfficeManager() throws OfficeException {
         File officeHome = LocalOfficeUtils.getDefaultOfficeHome();
         if (officeHome == null) {
